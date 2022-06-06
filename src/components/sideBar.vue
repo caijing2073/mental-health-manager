@@ -8,16 +8,12 @@
         @open="handleOpen"
         @close="handleClose"
       >
-        <!-- <el-menu-item v-for="item in menuItems" :key="item.desc" :index="item.index">
-          <i :class="item.icon"></i>
-          {{item.desc}}
-        </el-menu-item> -->
-        <!-- <el-menu-item index="1-0" @click="toTest">
+        <el-menu-item index="1-0" @click="toTest">
           <i class="el-icon-edit"></i>测评问卷
         </el-menu-item>
         <el-menu-item index="1-1" @click="toMusic">
           <i class="el-icon-headset"></i>音乐管理
-        </el-menu-item> -->
+        </el-menu-item>
         <el-menu-item index="1-2" @click="toHotline">
           <i class="el-icon-phone-outline"></i>热线管理
         </el-menu-item>
@@ -39,32 +35,6 @@
 export default {
   data() {
     return {
-      menuItems: [
-        {
-          icon: 'el-icon-edit',
-          desc: '测评问卷'
-        },
-        {
-          icon: 'el-icon-headset',
-          desc: '音乐管理'
-        },
-        {
-          icon: 'el-icon-phone-outline',
-          desc: '热线管理'
-        },
-        {
-          icon: 'el-icon-date',
-          desc: '活动管理'
-        },
-        {
-          icon: 'el-icon-document',
-          desc: '文章管理'
-        },
-        {
-          icon: 'el-icon-magic-stick',
-          desc: '知识管理'
-        }
-      ]
     };
   },
   methods: {
