@@ -12,12 +12,12 @@
           <i :class="item.icon"></i>
           {{item.desc}}
         </el-menu-item> -->
-        <el-menu-item index="1-0" @click="toTest">
+        <!-- <el-menu-item index="1-0" @click="toTest">
           <i class="el-icon-edit"></i>测评问卷
         </el-menu-item>
         <el-menu-item index="1-1" @click="toMusic">
           <i class="el-icon-headset"></i>音乐管理
-        </el-menu-item>
+        </el-menu-item> -->
         <el-menu-item index="1-2" @click="toHotline">
           <i class="el-icon-phone-outline"></i>热线管理
         </el-menu-item>

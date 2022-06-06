@@ -1,7 +1,7 @@
 <template>
   <div class="hot-line">
     <ToolBar @search="search" @create="create" @deleteItem="deleteItem"></ToolBar>
-    <el-dialog title="新增小知识" :visible.sync="dialogFormVisible">
+    <el-dialog title="新增活动" :visible.sync="dialogFormVisible">
       <el-form :model="form">
         <el-form-item label="标题" :label-width="formLabelWidth">
           <el-input v-model="form.title" autocomplete="off"></el-input>
@@ -18,7 +18,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="createTip">确 定</el-button>
+        <el-button type="primary" @click="createActive">确 定</el-button>
       </div>
     </el-dialog>
     <el-table
@@ -72,7 +72,7 @@ export default {
     };
   },
   mounted() {
-    this.getTip();
+    this.getActive();
   },
   watch: {
     size() {
@@ -84,7 +84,7 @@ export default {
     search(val) {
       const result = [];
       if (!val) {
-        this.getTip();
+        this.getActive();
         return;
       } else {
         totalData.forEach(dataItem => {
@@ -114,7 +114,7 @@ export default {
       });
       return result;
     },
-    async createTip() {
+    async createActive() {
       const month =
         (new Date().getMonth() + 1).length > 1
           ? new Date().getMonth() + 1
@@ -164,7 +164,7 @@ export default {
         });
       }
     },
-    getTip() {
+    getActive() {
       axios({
         url: '/api/tip/getInfo',
         method: 'get'
