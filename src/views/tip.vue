@@ -43,172 +43,213 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
+    <button @click="test">click me</button>
+    <button @click="testChange">change data</button>
+    <button @click="testGet">get data</button>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import ToolBar from '../components/toolBar.vue';
-let totalData = [];
-let currentData = [];
-export default {
-  components: {
-    ToolBar
-  },
-  data() {
-    return {
-      tableData: [],
-      total: 0,
-      size: 10,
-      multipleSelection: [],
-      currentPage: 1,
-      dialogFormVisible: false,
-      form: {
-        title: '',
-        publishTime: '',
-        content: ''
-      },
-      formLabelWidth: '120px'
-    };
-  },
-  mounted() {
-    this.getTip();
-  },
-  watch: {
-    size() {
-      this.currentPage = 1;
-      this.switchData(1);
-    }
-  },
-  methods: {
-    search(val) {
-      const result = [];
-      if (!val) {
-        this.getTip();
-        return;
-      } else {
-        totalData.forEach(dataItem => {
-          Object.keys(dataItem).forEach(key => {
-            if (
-              typeof dataItem[key] === 'string' &&
-              dataItem[key].includes(val)
-            ) {
-              result.push(dataItem);
-            }
-          });
-        });
-        currentData = result.slice(1);
-        this.total = result.length - 1;
-      }
-      this.switchData(1);
+  import axios from 'axios';
+  import ToolBar from '../components/toolBar.vue';
+  let totalData = [];
+  let currentData = [];
+  export default {
+    components: {
+      ToolBar,
     },
-    create() {
-      this.dialogFormVisible = true;
+    data() {
+      return {
+        tableData: [],
+        total: 0,
+        size: 10,
+        multipleSelection: [],
+        currentPage: 1,
+        dialogFormVisible: false,
+        form: {
+          title: '',
+          publishTime: '',
+          content: '',
+        },
+        formLabelWidth: '120px',
+      };
     },
-    checkCreateParams() {
-      let result = true;
-      Object.keys(this.form).forEach(item => {
-        if (!this.form[item]) {
-          result = false;
-        }
-      });
-      return result;
+    mounted() {
+      this.getTip();
     },
-    async createTip() {
-      const month =
-        (new Date().getMonth() + 1).length > 1
-          ? new Date().getMonth() + 1
-          : `0${new Date().getMonth() + 1}`;
-      const day =
-        new Date().getDate().length > 1
-          ? new Date().getDate()
-          : `0${new Date().getDate()}`;
-      const nowDate = `${new Date().getFullYear()}-${month}-${day}`;
-      this.form.publishTime = nowDate;
-      const isLegalparam = this.checkCreateParams();
-      if (!isLegalparam) {
-        return this.$message({
-          type: 'error',
-          message: '请将参数填写完整'
-        });
-      }
-      const result = await axios({
-        url: '/api/tip/create',
-        method: 'post',
-        data: {
-          tip: this.form
-        }
-      });
-      const { code, message, state } = result.data;
-      this.dialogFormVisible = false;
-      if (code === 200) {
-        this.$message({
-          type: state,
-          message
-        });
-      }
-    },
-    async deleteItem(val) {
-      const result = await axios({
-        url: '/api/tip/delete',
-        method: 'post',
-        data: {
-          form: this.multipleSelection
-        }
-      });
-      const { code, message, state } = result.data;
-      if (code === 200) {
-        this.$message({
-          type: state,
-          message
-        });
-      }
-    },
-    getTip() {
-      axios({
-        url: '/api/tip/getInfo',
-        method: 'get'
-      }).then(res => {
-        totalData = res.data.tip;
-        currentData = totalData;
-        this.total = totalData.length;
+    watch: {
+      size() {
         this.currentPage = 1;
-        console.log('res', res);
-        if (currentData.length) {
-          this.tableData = currentData.slice(0, 10);
+        this.switchData(1);
+      },
+    },
+    methods: {
+      test() {
+        axios({
+          url: '/api/demo/create',
+          method: 'post',
+          data: {
+            demo: {
+              owner: 'reggie',
+              team: [
+                {
+                  a: 1,
+                  b: 2,
+                },
+              ],
+            },
+          },
+        });
+      },
+      testChange() {
+        axios({
+          url: '/api/demo/edit',
+          method: 'post',
+          data: {
+            demo: {
+              owner: 'reggie',
+              team: [
+                {
+                  a: 3,
+                  b: 4,
+                },
+              ],
+            },
+            owner: 'reggie'
+          },
+        });
+      },
+      testGet() {
+        axios({
+          url: '/api/demo/all',
+          method: 'get',
+        }).then((res) => {
+          console.log(res.data);
+        });
+      },
+      search(val) {
+        const result = [];
+        if (!val) {
+          this.getTip();
+          return;
+        } else {
+          totalData.forEach((dataItem) => {
+            Object.keys(dataItem).forEach((key) => {
+              if (typeof dataItem[key] === 'string' && dataItem[key].includes(val)) {
+                result.push(dataItem);
+              }
+            });
+          });
+          currentData = result.slice(1);
+          this.total = result.length - 1;
         }
-      });
+        this.switchData(1);
+      },
+      create() {
+        this.dialogFormVisible = true;
+      },
+      checkCreateParams() {
+        let result = true;
+        Object.keys(this.form).forEach((item) => {
+          if (!this.form[item]) {
+            result = false;
+          }
+        });
+        return result;
+      },
+      async createTip() {
+        const month =
+          (new Date().getMonth() + 1).length > 1
+            ? new Date().getMonth() + 1
+            : `0${new Date().getMonth() + 1}`;
+        const day =
+          new Date().getDate().length > 1 ? new Date().getDate() : `0${new Date().getDate()}`;
+        const nowDate = `${new Date().getFullYear()}-${month}-${day}`;
+        this.form.publishTime = nowDate;
+        const isLegalparam = this.checkCreateParams();
+        if (!isLegalparam) {
+          return this.$message({
+            type: 'error',
+            message: '请将参数填写完整',
+          });
+        }
+        const result = await axios({
+          url: '/api/tip/create',
+          method: 'post',
+          data: {
+            tip: this.form,
+          },
+        });
+        const { code, message, state } = result.data;
+        this.dialogFormVisible = false;
+        if (code === 200) {
+          this.$message({
+            type: state,
+            message,
+          });
+        }
+      },
+      async deleteItem(val) {
+        const result = await axios({
+          url: '/api/tip/delete',
+          method: 'post',
+          data: {
+            form: this.multipleSelection,
+          },
+        });
+        const { code, message, state } = result.data;
+        if (code === 200) {
+          this.$message({
+            type: state,
+            message,
+          });
+        }
+      },
+      getTip() {
+        axios({
+          url: '/api/tip/getInfo',
+          method: 'get',
+        }).then((res) => {
+          totalData = res.data.tip;
+          currentData = totalData;
+          this.total = totalData.length;
+          this.currentPage = 1;
+          console.log('res', res);
+          if (currentData.length) {
+            this.tableData = currentData.slice(0, 10);
+          }
+        });
+      },
+      switchData(currentPage) {
+        if (currentData.length) {
+          this.tableData = currentData.slice(
+            (currentPage - 1) * this.size,
+            currentPage * this.size,
+          );
+        }
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      handleSizeChange(val) {
+        this.size = val;
+      },
+      handleCurrentChange(val) {
+        this.switchData(val);
+      },
     },
-    switchData(currentPage) {
-      if (currentData.length) {
-        this.tableData = currentData.slice(
-          (currentPage - 1) * this.size,
-          currentPage * this.size
-        );
-      }
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
-    },
-    handleSizeChange(val) {
-      this.size = val;
-    },
-    handleCurrentChange(val) {
-      this.switchData(val);
-    }
-  }
-};
+  };
 </script>
 
 <style lang="less">
-.hot-line {
-  padding: 0 60px;
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-}
+  .hot-line {
+    padding: 0 60px;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-.pager {
-  margin: 20px 0;
-}
+  .pager {
+    margin: 20px 0;
+  }
 </style>

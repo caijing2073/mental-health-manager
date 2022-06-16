@@ -8,7 +8,7 @@
             <el-input v-model="formLabelAlign.name"></el-input>
           </el-form-item>
           <el-form-item label="密码">
-            <el-input v-model="formLabelAlign.region" show-password></el-input>
+            <el-input v-model="formLabelAlign.password" show-password></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -18,56 +18,60 @@
 </template>
 
 <script>
-export default {
-  name: 'login',
-  data() {
-    return {
-      labelPosition: 'right',
-      formLabelAlign: {
-        name: '',
-        region: '',
-        type: ''
-      }
-    };
-  },
-  methods: {
-    login() {
-      this.$router.push('/');
+  import { mapMutations } from 'vuex';
+  export default {
+    name: 'login',
+    data() {
+      return {
+        labelPosition: 'right',
+        formLabelAlign: {
+          name: '',
+          password: '',
+          type: '',
+        },
+      };
     },
-  }
-};
+    methods: {
+      ...mapMutations(['setLogin']),
+      login() {
+        if (this.formLabelAlign.name !== 'admin' || this.formLabelAlign.password !== '123456') return;
+        this.setLogin();
+        this.$router.push('/');
+      },
+    },
+  };
 </script>
 
 <style lang="less">
-.login {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  position: relative;
-  background-color: rgb(192, 205, 228);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  .login {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+    background-color: rgb(192, 205, 228);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-.login-wrap {
-  width: 400px;
-  background-color: #fff;
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  .title {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 500;
-    margin-bottom: 20px;
+  .login-wrap {
+    width: 400px;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .login-btn {
+      margin-top: 10px;
+      width: 70%;
+    }
   }
-  .login-btn {
-    margin-top: 10px;
-    width: 70%;
-  }
-}
 </style>

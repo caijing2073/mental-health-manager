@@ -1,31 +1,132 @@
 <template>
-  <div class="hot-line">
-    <ToolBar @search="search" @create="create" @deleteItem="deleteItem"></ToolBar>
-    <el-dialog title="新增音乐" :visible.sync="dialogFormVisible">
-      <el-form :model="form">
-        <el-form-item label="标题" :label-width="formLabelWidth">
-          <el-input v-model="form.title" autocomplete="off"></el-input>
+  <div class="test">
+    <div class="test-type_wrap">
+      音乐类型：
+      <el-tag type="success" v-for="tag in fixTag" :key="tag">{{ tag }}</el-tag>
+    </div>
+
+    <el-dialog title="编辑音乐类型信息" :visible.sync="editTagDialogVisible">
+      <el-form :model="editTagForm">
+        <el-form-item label="测评类型" label-width="180">
+          <el-input disabled="true" v-model="editTagForm.tag" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="icon" label-width="180">
+          <img v-if="editTagForm.icon" :src="editTagForm.icon" />
+          <el-upload
+            v-else
+            class="upload-demo"
+            drag
+            action="/api/music/editMusicInfo"
+            :data="{
+              tag: editTagForm.tag,
+              type: 'icon'
+            }"
+            multiple
+            :on-success="uploadTagIcon"
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">
+              将文件拖到此处，或
+              <em>点击上传</em>
+            </div>
+            <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="createTip">确 定</el-button>
+        <el-button @click="editTagDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editTagDialogVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
+    <div class="test-type-set_wrapp">
+      <el-table :data="tableData" border style="width: 100%">
+        <el-table-column prop="tag" label="音乐类型"></el-table-column>
+        <el-table-column label="icon">
+          <template slot-scope="scope">
+            <img v-if="scope.row.icon" :src="scope.row.icon" class="table-icon" />
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作">
+          <template slot-scope="scope">
+            <el-button @click="editMusic(scope.row)" type="text" size="small">编辑</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <div class="add" @click="createMusicDialog = true">+ 添加音乐</div>
+    <el-dialog title="添加音乐" :visible.sync="createMusicDialog">
+      <el-form :model="musicForm">
+        <el-form-item label="心情类型" label-width="180">
+          <el-select v-model="musicForm.type" placeholder="请选择音乐心情">
+            <el-option v-for="type in fixTag" :key="type" :label="type" :value="type"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="缩略图" label-width="180">
+          <img v-if="musicForm.icon" :src="musicForm.icon" />
+          <el-upload
+            v-else
+            class="upload-demo"
+            drag
+            action="/api/music/editMusicInfo"
+            :data="{
+              tag: musicForm.tag,
+            }"
+            multiple
+            :on-success="uploadTagIcon"
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">
+              将文件拖到此处，或
+              <em>点击上传</em>
+            </div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="音乐" label-width="180">
+          <div v-if="musicForm.music">{{musicForm.music}}</div>
+          <el-upload
+            v-else
+            class="upload-demo"
+            drag
+            action="/api/music/editMusicInfo"
+            :data="{
+              tag: musicForm.tag,
+              type: 'music'
+            }"
+            multiple
+            :on-success="uploadTagIcon"
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">
+              将文件拖到此处，或
+              <em>点击上传</em>
+            </div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="createMusicDialog = false">取 消</el-button>
+        <el-button type="primary" @click="createMusicDialog">确 定</el-button>
       </div>
     </el-dialog>
     <el-table
       ref="multipleTable"
-      :data="tableData"
+      :data="musicTableData"
       tooltip-effect="dark"
-      style="width: 100%"
-      @selection-change="handleSelectionChange"
+      style="width: 100%;margin-top:20px;"
       stripe
     >
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="title" width="120" label="标题"></el-table-column>
-      <el-table-column prop="publishTime" width="120" label="发布时间"></el-table-column>
-      <el-table-column prop="content" label="内容"></el-table-column>
+      <el-table-column prop="thumbnail" label="缩略图"></el-table-column>
+      <el-table-column prop="desc" label="音乐文件"></el-table-column>
+      <el-table-column prop="question" label="心情"></el-table-column>
+      <el-table-column fixed="right" label="操作" width="100">
+        <template slot-scope="scope">
+          <el-button @click="editMusicList(scope.row)" type="text" size="small">编辑</el-button>
+        </template>
+      </el-table-column>
     </el-table>
-    <el-pagination
+    <!-- <el-pagination
       class="pager"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -33,153 +134,61 @@
       :page-size="10"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
-    ></el-pagination>
+    ></el-pagination>-->
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import ToolBar from '../components/toolBar.vue';
-let totalData = [];
-let currentData = [];
 export default {
-  components: {
-    ToolBar
-  },
   data() {
     return {
+      fixTag: ['忧伤', '快乐', '平静', '兴趣', '寂寞', '治愈'],
+      selectedTag: '',
+      inputValue: '',
       tableData: [],
-      total: 0,
-      size: 10,
-      multipleSelection: [],
+      editTagDialogVisible: false,
+      createMusicDialog: false,
+      musicForm: {},
+      editTagForm: {},
+      musicTableData: '',
       currentPage: 1,
-      dialogFormVisible: false,
-      form: {
-        title: '',
-        publishTime: '',
-        content: ''
-      },
-      formLabelWidth: '120px'
+      total: 0
     };
   },
   mounted() {
-    this.getTip();
-  },
-  watch: {
-    size() {
-      this.currentPage = 1;
-      this.switchData(1);
-    }
+    this.fixTag.forEach(tag => {
+      this.tableData.push({
+        tag
+      });
+    });
   },
   methods: {
-    search(val) {
-      const result = [];
-      if (!val) {
-        this.getTip();
-        return;
-      } else {
-        totalData.forEach(dataItem => {
-          Object.keys(dataItem).forEach(key => {
-            if (
-              typeof dataItem[key] === 'string' &&
-              dataItem[key].includes(val)
-            ) {
-              result.push(dataItem);
-            }
-          });
-        });
-        currentData = result.slice(1);
-        this.total = result.length - 1;
-      }
-      this.switchData(1);
-    },
-    create() {
-      this.dialogFormVisible = true;
-    },
-    checkCreateParams() {
-      let result = true;
-      Object.keys(this.form).forEach(item => {
-        if (!this.form[item]) {
-          result = false;
-        }
-      });
-      return result;
-    },
-    async createTip() {
-      const month =
-        (new Date().getMonth() + 1).length > 1
-          ? new Date().getMonth() + 1
-          : `0${new Date().getMonth() + 1}`;
-      const day =
-        new Date().getDate().length > 1
-          ? new Date().getDate()
-          : `0${new Date().getDate()}`;
-      const nowDate = `${new Date().getFullYear()}-${month}-${day}`;
-      this.form.publishTime = nowDate;
-      const isLegalparam = this.checkCreateParams();
-      if (!isLegalparam) {
-        return this.$message({
-          type: 'error',
-          message: '请将参数填写完整'
-        });
-      }
-      const result = await axios({
-        url: '/api/tip/create',
-        method: 'post',
-        data: {
-          tip: this.form
-        }
-      });
-      const { code, message, state } = result.data;
-      this.dialogFormVisible = false;
-      if (code === 200) {
-        this.$message({
-          type: state,
-          message
-        });
-      }
-    },
-    async deleteItem(val) {
-      const result = await axios({
-        url: '/api/tip/delete',
-        method: 'post',
-        data: {
-          form: this.multipleSelection
-        }
-      });
-      const { code, message, state } = result.data;
-      if (code === 200) {
-        this.$message({
-          type: state,
-          message
-        });
-      }
-    },
-    getTip() {
+    editMusicList(val) {},
+    test() {
       axios({
-        url: '/api/tip/getInfo',
+        url: '/api/test/getAll',
         method: 'get'
       }).then(res => {
-        totalData = res.data.tip;
-        currentData = totalData;
-        this.total = totalData.length;
-        this.currentPage = 1;
-        console.log('res', res);
-        if (currentData.length) {
-          this.tableData = currentData.slice(0, 10);
-        }
+        console.log(res.data);
       });
     },
-    switchData(currentPage) {
-      if (currentData.length) {
-        this.tableData = currentData.slice(
-          (currentPage - 1) * this.size,
-          currentPage * this.size
-        );
-      }
+    handleClose(tag) {
+      this.selectedTag = tag;
+      this.deleteDialogVisible = true;
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
+    editMusic(val) {
+      this.editTagDialogVisible = true;
+      this.editTagForm = val;
+    },
+    uploadTagIcon(msg) {
+      this.$message({
+        type: 'success',
+        message: '上传图片成功'
+      });
+      const { imageFullCode } = msg;
+      this.tableData[this.editIndex].icon = imageFullCode;
+      console.log(this.tableData);
     },
     handleSizeChange(val) {
       this.size = val;
@@ -192,14 +201,30 @@ export default {
 </script>
 
 <style lang="less">
-.hot-line {
-  padding: 0 60px;
-  height: 100%;
+.test {
   width: 100%;
   box-sizing: border-box;
+  padding: 10px 20px;
+  .strong-tip {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .test-type_wrap {
+    width: 100%;
+    display: flex;
+    height: 60px;
+    align-items: center;
+    .input-new-tag {
+      width: 100px;
+    }
+  }
+  .table-icon {
+    height: 25px;
+    width: 25px;
+  }
 }
-
-.pager {
-  margin: 20px 0;
+.add {
+  margin-top: 10px;
+  font-weight: 300;
 }
 </style>
